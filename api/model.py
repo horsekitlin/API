@@ -3,7 +3,7 @@ Author: Tomas
 Date : 2014-03-02
 Desc: QASystem's Database model, Use Flask-mongoengine
 """
-from app import db
+from api import db
 from flask.ext.login import UserMixin
 from bson.objectid import ObjectId
 from flask.ext.mongoengine import ValidationError
