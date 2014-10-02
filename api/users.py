@@ -53,7 +53,11 @@ class UserAPI(Resource):
         return 'success',201
 
     def delete(self):
-        return request.get_json(force=True)
-
+        data = request.get_json(force=True)
+        try:
+            User.objects(**data).delete()
+        except:
+            return 'Delete false', 500
+        return 'Delete success', 201
 
 api.add_resource(UserAPI, '/users/', endpoint='user')

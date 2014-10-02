@@ -7,6 +7,7 @@ from api import db
 from flask.ext.login import UserMixin
 from bson.objectid import ObjectId
 from flask.ext.mongoengine import ValidationError
+import uuid
 
 class User(db.Document, UserMixin):
     """
@@ -21,10 +22,13 @@ class User(db.Document, UserMixin):
     """
     account = db.StringField( required=True)
     pwd = db.StringField(required=True)
-    name = db.StringField()
-    email = db.EmailField()
+    name = db.StringField(required=True, unique=True)
+    email = db.EmailField(unique=True)
     group = db.StringField()
     logo = db.StringField()
+    client_screct = db.StringField(required=True, default=uuid.uuid4())
+    is_credital = db.BooleanField(default=True)
+    token = db.StringField()
     lastlogin = db.DateTimeField()
     IP = db.StringField()
     Quota = db.FloatField()
