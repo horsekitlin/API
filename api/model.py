@@ -22,11 +22,12 @@ class User(db.Document, UserMixin):
     """
     account = db.StringField( required=True)
     pwd = db.StringField(required=True)
+    sign_pwd = db.StringField(required=True)
     name = db.StringField(required=True, unique=True)
     email = db.EmailField(unique=True)
     group = db.StringField()
     logo = db.StringField()
-    client_screct = db.StringField(required=True, default=uuid.uuid4())
+    client_screct = db.UUIDField(required=True, default=uuid.uuid4())
     is_credital = db.BooleanField(default=True)
     token = db.StringField()
     lastlogin = db.DateTimeField()

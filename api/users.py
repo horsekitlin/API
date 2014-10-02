@@ -2,6 +2,7 @@
 from flask import request
 from api import api
 from model import User
+from itsdangerous import Signer
 from flask.ext.restful import Resource, reqparse
 from flask.ext.mongoengine import ValidationError
 
@@ -23,6 +24,8 @@ class UserAPI(Resource):
 
     def put(self):
         data = request.get_json(force=True)
+        #密碼加密
+        data['sign_pwd'] = Signer(data['pwd']).sign('pwd')
         try:
             Obj = User(**data).save()
         except:
