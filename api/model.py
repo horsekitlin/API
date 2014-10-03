@@ -27,9 +27,6 @@ class User(db.Document, UserMixin):
     email = db.EmailField(unique=True)
     group = db.StringField()
     logo = db.StringField()
-    client_screct = db.UUIDField(required=True, default=uuid.uuid4())
-    is_credital = db.BooleanField(default=True)
-    token = db.StringField()
     lastlogin = db.DateTimeField()
     IP = db.StringField()
     Quota = db.FloatField()
@@ -41,31 +38,79 @@ class User(db.Document, UserMixin):
             'collection': 'users'
     }
 
+    def user(self):
+        return self
+
     def generate_auth_token(self, expiration=600):
         s = Serializer(app.config['SECRET_KEY'], expires_in = expiration)
         return s.dumps({'id': self.id})
 
-    @staticmethod
-    def verify_auth_token(token):
-        s = Serializer(app.config['SECRET_KEY'])
-        data = s.loads(token)
-        user = User.objects.with_id(data['id'])
-        return user
-
     def get_id(self):
         return unicode(self.id)
 
-    def EditUser(self, newinfo):
-        try:
-            status = self.objects.exclude('users').update(**newinfo)
-        except ValidationError as e:
-            return e.to_dict()
-        return status
 
+class Client(db.Document):
+    client_id = db.StringField(unique=True)
+    client_secret = db.StringField(unique=True)
+    is_credital = db.BooleanField(default = True)
+    user = db.ReferenceField(User, dbref = True)
+    _redirect_uris = db.ListField(db.StringField())
+    _default_scopes = db.StringField()
+
+    @property
+    def client_type(self):
+        return 'public'
+
+    @property
+    def redirect_uris(self):
+        if self._redirect_uris:
+            return self._redirect_uris
+        return list()
+
+    @property
+    def default_redirect_uri(self):
+        return self.redirect_uris[0]
+
+    @property
+    def default_scopes(self):
+        if self._default_scopes:
+            return self._default_scopes
+        return list()
+
+class Grant(db.Document):
+    user_id = db.ReferenceField(User, dbref = True)
+    client = db.ReferenceField(Client, dbref = True)
+    code = db.StringField()
+    redirect_uri = db.StringField()
+    expires = db.DateTimeField()
+    _scopes = db.ListField(db.StringField())
+
+    def delete(self):
+        pass
+
+    @property
+    def scopes(self):
+        if self._scopes:
+            return self._scopes
+        return list()
+
+class Token(db.Document):
+    client = db.ReferenceField(Client, dbref = True)
+    user = db.ReferenceField(User, dbref = True)
+    token_type = db.StringField(unique = True)
+    access_token = db.StringField(unique = True)
+    refresh_token = db.StringField(unique = True)
+    expires = db.DateTimeField()
+    _scopes = db.ListField(db.StringField())
+
+    @property
+    def scopes(self):
+        if self._scopes:
+            return self._scopes
+        return list()
+
+"""
 class GlobalSession(db.Document):
-    """
-        Global Session store
-    """
     uid = db.ObjectIdField()
 
     meta = {
@@ -87,3 +132,4 @@ class GlobalSession(db.Document):
     def Logout(self):
         GlobalSession.objects(id = ObjectId(self.id)).delete()
         return True
+"""
